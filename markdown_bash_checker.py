@@ -1,8 +1,8 @@
 #!/user/bin/env python3
 
 description = """
-Parses a specially-formatted markdown file and executes all of the specially-marked bash code blocks.  Useful for
-checking that all of the commands in a tutorial work.
+Parses a specially-formatted markdown file (which comes from STDIN) and executes all of the specially-marked bash
+code blocks.  Useful for checking that all of the commands in a tutorial work.
 
 Code blocks to execute use the following special languages:
     * bash-env - Indicates a commands that modifies the environment somehow.  These commands will be run before every
@@ -17,7 +17,6 @@ Features to add:
 
 import argparse
 import os
-import re
 import logging
 import sys
 import subprocess
@@ -134,7 +133,6 @@ class MarkdownChecker(object):
     """
 
     def __init__(self):
-        self._markdown_file = None
         self._markdown_text = None
         self._bash_commands = None
 
@@ -144,8 +142,6 @@ class MarkdownChecker(object):
             description=description,
             formatter_class=argparse.RawTextHelpFormatter
         )
-
-        parser.add_argument("markdown_file", help="Markdown file to parse.")
 
         parser.add_argument(
             '-v',
@@ -173,11 +169,8 @@ class MarkdownChecker(object):
         if args.debug:
             logging.basicConfig(level=logging.DEBUG)
 
-        self._markdown_file = args.markdown_file
-        assert os.path.isfile(self._markdown_file), "Cannot find markdown file %s" % self._markdown_file
-
     def _get_markdown(self):
-        self._markdown_text = open(self._markdown_file).read()
+        self._markdown_text = sys.stdin.read()
 
     def _parse_markdown(self):
         """ Actually parse the markdown file, capturing the bash commands to run in a list. """
